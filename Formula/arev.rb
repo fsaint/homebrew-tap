@@ -1,15 +1,15 @@
 class Arev < Formula
   desc "Asset review loop for AI agents: images, video and PDF reviewed by a human"
   homepage "https://github.com/fsaint/arev"
-  url "https://github.com/fsaint/arev/archive/refs/tags/v0.1.0.tar.gz"
-  sha256 "5549c2b6636cee67c62bb564329a8ab808f93f86a8da0609c538cb0583355c59"
+  url "https://github.com/fsaint/arev/archive/refs/tags/v0.1.1.tar.gz"
+  sha256 "7131102b75aa58eb3dd79a5c86f4b69e57f1e0c95e3ed0d04945d1ec0748296d"
 
   depends_on "node"
 
   def install
-    # Dev dependencies (TypeScript) are needed to build dist/; better-sqlite3 is
-    # compiled against Homebrew's node.
-    system "npm", "install", *std_npm_args(prefix: false)
+    # Dev dependencies (TypeScript) are needed to build dist/. Install scripts must
+    # run so better-sqlite3 compiles its native module against Homebrew's node.
+    system "npm", "install", *std_npm_args(prefix: false, ignore_scripts: false)
     system "npm", "run", "build"
     system "npm", "prune", "--omit=dev"
     libexec.install "package.json", "dist", "web", "node_modules"
@@ -31,5 +31,6 @@ class Arev < Formula
     (testpath/"a.png").write "not really a png"
     output = shell_output("#{bin}/arev --json submit a.png --name t --no-open")
     assert_match '"version": 1', output
+    assert_match "pending", shell_output("#{bin}/arev status t")
   end
 end
